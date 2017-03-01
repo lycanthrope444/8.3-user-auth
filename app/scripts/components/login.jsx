@@ -2,34 +2,45 @@ var $ = require('jquery');
 var Backbone = require('backbone');
 var React = require('react');
 
-var apiUrl = 'https://tiny-parse-server.herokuapp.com';
+var Messages = require('./messages.jsx').Messages;
+var MessageList = require('./messages.jsx').MessageList;
+
+var apiUrl = 'https://tiny-parse-server.herokuapp.com/classes/User';
+
+function setupAjax(loggedInUser){
+  $.ajaxSetup({
+      beforeSend: function(xhr){
+        xhr.setRequestHeader("X-Parse-Application-Id", "tiygvl");
+        xhr.setRequestHeader("X-Parse-REST-API-Key", "slumber");
+        if(loggedInUser){
+          xhr.setRequestHeader("X-Parse-Session-Token", loggedInUser.sessionToken);
+        }
+      }
+  });
+}
 
 class LogIn extends React.Component{
   constructor(){
     super();
+    setupAjax();
   }
   componentWillMount(){
 
   }
-  setupAjax(loggedInUser){
-    $.ajaxSetup({
-        beforeSend: function(xhr){
-          xhr.setRequestHeader("X-Parse-Application-Id", "tiygvl");
-          xhr.setRequestHeader("X-Parse-REST-API-Key", "slumber");
-          if(loggedInUser){
-            xhr.setRequestHeader("X-Parse-Session-Token", loggedInUser.sessionToken);
-          }
-        }
-    });
-  }
+
   userLogin(email, password){
     console.log('user Login clicked', email, password);
     var user = {
       username:email,
       password:password
     }
-    $.post(apiUrl + '/users', user).then(function(data){
+
+    var url = apiUrl + $.param(user);
+
+    $.get(url).then(function(data){
       console.log(data);
+      var userData = JSON.stringify(data);
+      localStorage.setItem('user', userData);
     });
   }
   createUser(email, password){
@@ -38,11 +49,12 @@ class LogIn extends React.Component{
       username:email,
       password:password
     }
-    $.get(url).then(function(data){
+    $.post(apiUrl, user).then(function(data){
       console.log(data);
-      var userData = JSON.stringify(data);
-      localStorage.setItem('user', userData);
     });
+  }
+  submitMessage(message){
+    console.log('message clicked');
   }
   render(){
     return(
@@ -50,6 +62,8 @@ class LogIn extends React.Component{
         <div className="row">
           <UserLogin data={this.state} userLogin={this.userLogin} />
           <CreateUser data={this.state} createUser={this.createUser} />
+          <Messages submitMessage={this.submitMessage}/>
+          <MessageList />
         </div>
       </div>
     )

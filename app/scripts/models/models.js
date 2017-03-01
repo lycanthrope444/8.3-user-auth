@@ -10,7 +10,8 @@ var MessagesModel = Backbone.Model.extend({
 });
 
 var MessagesCollection = Backbone.Collection.extend({
-  model: MessagesModel
+  model: MessagesModel,
+  url: 'https://tiny-parse-server.herokuapp.com/classes/User'
 });
 
 module.exports = {
