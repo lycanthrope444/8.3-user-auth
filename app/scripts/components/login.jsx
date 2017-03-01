@@ -2,22 +2,54 @@ var $ = require('jquery');
 var Backbone = require('backbone');
 var React = require('react');
 
+var apiUrl = 'https://tiny-parse-server.herokuapp.com';
+
 class LogIn extends React.Component{
   constructor(){
     super();
   }
+  componentWillMount(){
+
+  }
+  setupAjax(loggedInUser){
+    $.ajaxSetup({
+        beforeSend: function(xhr){
+          xhr.setRequestHeader("X-Parse-Application-Id", "tiygvl");
+          xhr.setRequestHeader("X-Parse-REST-API-Key", "slumber");
+          if(loggedInUser){
+            xhr.setRequestHeader("X-Parse-Session-Token", loggedInUser.sessionToken);
+          }
+        }
+    });
+  }
   userLogin(email, password){
     console.log('user Login clicked', email, password);
+    var user = {
+      username:email,
+      password:password
+    }
+    $.post(apiUrl + '/users', user).then(function(data){
+      console.log(data);
+    });
   }
   createUser(email, password){
     console.log('user create clicked', email, password);
+    var user = {
+      username:email,
+      password:password
+    }
+    $.get(url).then(function(data){
+      console.log(data);
+      var userData = JSON.stringify(data);
+      localStorage.setItem('user', userData);
+    });
   }
   render(){
     return(
       <div className="container">
         <div className="row">
-          <UserLogin data={this.state} userLogin={this.userLogin}/>
-          <CreateUser data={this.state} createUser={this.createUser}/>
+          <UserLogin data={this.state} userLogin={this.userLogin} />
+          <CreateUser data={this.state} createUser={this.createUser} />
         </div>
       </div>
     )
